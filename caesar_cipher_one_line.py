@@ -1,0 +1,3 @@
+# -*- coding: UTF-8 -*-
+# Python 2.7
+raw_input("%s\n\nPress Enter" % (lambda: '\nCaesar cipher: %s' % ((lambda shift, sourceStr, alphabet: ''.join([(lambda x: x if x == " " else alphabet[(lambda i: i if i < len(alphabet) else i - len(alphabet))(alphabet.find(x) + shift - shift * (shift // len(alphabet)))])(nextChar) for nextChar in sourceStr if alphabet.find(nextChar) != -1 or nextChar == " "]))(shift=input("Enter the shift (number)\n"), sourceStr=raw_input("\nEnter the message\n"), alphabet='!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'), ))())
