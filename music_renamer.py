@@ -10,16 +10,25 @@ Need mutagen module (http://mutagen.readthedocs.org/)
 """
 
 import sys, os
-# from mutagen.easyid3 import EasyID3
+
 try:
     from mutagen.easyid3 import EasyID3
 except ImportError:
     print ("Sorry but you don't have 'mutagen' module. Please install it.")
     exit()
 
-def get_title(path_to_file):
-    audio = EasyID3(path_to_file)
-    return audio["title"]
+
+def get_metainf(path_to_file):
+    result = dict()
+
+    try:
+        audio = EasyID3(path_to_file)
+        result["title"] = audio["title"][0]
+        result["artist"] = audio["artist"][0]
+    except Exception:
+        result = None
+
+    return result
 
 
 def write_file(path_to_file, data):
@@ -78,28 +87,42 @@ path_to_in_file = None
 path_to_out_file = None
 # Binary data from input file
 data = None
-# ID3 title from input file
+# ID3 meta information from input file
+metainf = None
 title = None
+artist = None
 # Input file extension
 extension = None
 
 for file_name in os.listdir(in_dir):
     path_to_in_file = os.path.join(in_dir, file_name)
+    extension = os.path.splitext(file_name)[-1]
 
     print ("'%s' file processing..." % (path_to_in_file, ))
-    title = get_title(path_to_in_file)[0].strip()
-    # convert non english title to right windows coding
-    title = title.encode('latin1').decode("cp1251")
-    extension = os.path.splitext(file_name)[-1]
+    metainf = get_metainf(path_to_in_file)
+
+    if metainf == None:
+        print ("\tFile ID3-title is empty...")
+        title = file_name
+        artist = "Unknown"
+    else:
+        title = metainf["title"].strip()
+        artist = metainf["artist"]
+        try:
+            # try convert non english title and artist to right windows coding
+            title = title.encode('latin1').decode("cp1251")
+            artist = artist.encode('latin1').decode("cp1251")
+        except Exception:
+            pass
+
     print ("\tFile reading...")
+
     data = get_data(path_to_in_file)
 
-    path_to_out_file = os.path.join(out_dir, "%s%s" % (title, extension))
+    path_to_out_file = os.path.join(out_dir, "%s - %s%s" % (artist, title, extension))
 
     print ("\t'%s' file writing..." % (path_to_out_file, ))
     write_file(path_to_out_file, data)
-
-    print ("\tDone. New file name is '%s'" % (title, ))
 
 
 print ("------------------------")
